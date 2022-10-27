@@ -57,14 +57,15 @@ fn calc_epsilon(gamma_string: String) -> u32 {
 }
 
 fn gamma_rate(input: Vec<String>) -> String {
-    let mut gamma: Vec<u32> = vec![0; 12];
+    let digits = input[0].len();
+    let mut gamma: Vec<u32> = vec![0; digits];
 
-    for s in &input {
-        for (i, c) in s.chars().enumerate() {
+    input.iter().for_each(|line| {
+        for (i, c) in line.chars().enumerate() {
             let val: u32 = c.to_digit(10).unwrap();
             gamma[i] += val;
         }
-    }
+    });
 
     let len = (input.len() / 2) as u32;
 
