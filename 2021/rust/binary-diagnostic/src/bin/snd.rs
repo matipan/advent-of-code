@@ -31,4 +31,73 @@
  *
  * Use the binary numbers in your diagnostic report to calculate the oxygen generator rating and CO2 scrubber rating, then multiply them together. What is the life support rating of the submarine? (Be sure to represent your answer in decimal, not binary.)
 */
-fn main() {}
+use std::fs::File;
+use std::io::{BufRead, BufReader};
+
+fn main() {
+    let inputs = _input_from_file("input.txt");
+
+    let oxygen = isize::from_str_radix(
+        &rating_calculator(inputs.clone(), 0, &most_common_bit).as_str(),
+        2,
+    )
+    .unwrap() as u32;
+
+    let co2 = isize::from_str_radix(
+        &rating_calculator(inputs.clone(), 0, &least_common_bit).as_str(),
+        2,
+    )
+    .unwrap() as u32;
+
+    println!("oxygen({}) * co2({}) = {}", oxygen, co2, oxygen * co2);
+}
+
+fn rating_calculator(
+    input: Vec<String>,
+    idx: usize,
+    get_bit: &dyn Fn(&Vec<String>, usize) -> char,
+) -> String {
+    if input.len() == 1 {
+        return input[0].clone();
+    }
+
+    let bit = get_bit(&input, idx);
+
+    return rating_calculator(
+        input
+            .into_iter()
+            .filter(|v| v.chars().collect::<Vec<char>>()[idx] == bit)
+            .collect::<Vec<String>>(),
+        idx + 1,
+        get_bit,
+    );
+}
+
+fn _input_from_file(file: &str) -> Vec<String> {
+    let f = File::open(file).expect("Unable to open file");
+    let f = BufReader::new(f);
+
+    return f.lines().map(|v| v.unwrap()).collect::<Vec<String>>()[0..5].to_vec();
+}
+
+fn least_common_bit(input: &Vec<String>, idx: usize) -> char {
+    let c = most_common_bit(input, idx);
+    if c == '1' {
+        return '0';
+    } else {
+        return '1';
+    }
+}
+
+fn most_common_bit(input: &Vec<String>, idx: usize) -> char {
+    let half = input.len() as f32 / 2.0;
+    let mut count = 0.0;
+
+    input.iter().for_each(|line| {
+        count += line.chars().collect::<Vec<char>>()[idx]
+            .to_digit(2)
+            .unwrap() as f32;
+    });
+
+    return if count >= half { '1' } else { '0' };
+}
